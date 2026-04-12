@@ -1,0 +1,84 @@
+import logging
+from typing import Optional
+
+from app.services.gemini_service import call_gemini
+from app.prompts.reply_prompt import REPLY_PROMPT
+
+logger = logging.getLogger(__name__)
+
+
+# =========================
+# Prompt Builder
+# =========================
+def _build_prompt(
+    review: str,
+    rating: int,
+    reviewer: str,
+    store: str,
+    issue_type: str,
+    complaint_link: Optional[str],
+) -> str:
+    review = " ".join((review or "").strip().split())
+    instruction = f"- Include this support link: {complaint_link}" if complaint_link else ""
+
+    return REPLY_PROMPT.format(
+        reviewer=reviewer or "Customer",
+        store=store or "our store",
+        rating=rating,
+        review=review,
+        issue_type=issue_type,
+        complaint_instruction=instruction,
+    )
+
+
+# =========================
+# Fallback Reply
+# =========================
+def _fallback_reply(rating: int, store: str, complaint_link: Optional[str] = None) -> str:
+    store = store or "our store"
+
+    if rating >= 4:
+        return (
+            f"Thank you for your feedback! We're glad you had a great experience at {store}. "
+            "We look forward to serving you again."
+        )
+    if rating <= 2:
+        base = (
+            f"We're sorry to hear about your experience at {store}. "
+            "We truly understand your concern and are working to make things right."
+        )
+        if complaint_link:
+            base += f" You can reach us here: {complaint_link}"
+        return base
+
+    return (
+        f"Thank you for your feedback. We appreciate your input and will continue "
+        f"to improve our services at {store}."
+    )
+
+
+# =========================
+# Reply Agent
+# =========================
+async def reply_agent(
+    review: str,
+    rating: int,
+    reviewer: str,
+    store: str,
+    issue_type: str = "other",
+    complaint_link: Optional[str] = None,
+) -> str:
+
+    prompt = _build_prompt(review, rating, reviewer, store, issue_type, complaint_link)
+
+    llm_result = await call_gemini(prompt, agent_name="reply_agent")
+
+    if llm_result.get("status") != "success":
+        raise ValueError("LLM failed in reply_agent")
+
+    reply = llm_result.get("content", "").strip()
+
+    if not reply or len(reply.split()) < 10:
+        raise ValueError("Reply too short or empty")
+
+    return reply
