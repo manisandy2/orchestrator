@@ -34,6 +34,24 @@ def _build_prompt(
         complaint_instruction=instruction,
     )
 
+def validate_reply(reply: str) -> None:
+    if not reply:
+        raise ValueError("Reply is empty")
+
+    if len(reply.split()) < 10:
+        raise ValueError("Reply too short")
+
+    banned_phrases = [
+        "i don't know",
+        "not my job",
+        "no idea",
+    ]
+
+    lower_reply = reply.lower()
+
+    if any(p in lower_reply for p in banned_phrases):
+        raise ValueError("Unsafe reply detected")
+
 
 # =========================
 # Fallback Reply
@@ -71,20 +89,41 @@ async def reply_agent(
     store: str,
     issue_type: str = "other",
     tone: str = "neutral",
-    issues: list = None,
+    issues: Optional[list] = None,
     complaint_link: Optional[str] = None,
 ) -> str:
 
-    prompt = _build_prompt(review, rating, reviewer, store, issue_type, tone, issues, complaint_link)
+    prompt = _build_prompt(
+        review,
+        rating,
+        reviewer,
+        store,
+        issue_type,
+        tone,
+        issues,
+        complaint_link,
+    )
 
-    llm_result = await call_gemini(prompt, agent_name="reply_agent")
+    max_retries = 2
 
-    if llm_result.get("status") != "success":
-        raise ValueError("LLM failed in reply_agent")
+    for attempt in range(max_retries):
+        try:
+            logger.info(f"Reply attempt {attempt + 1}")
 
-    reply = llm_result.get("content", "").strip()
+            llm_result = await call_gemini(prompt, agent_name="reply_agent")
 
-    if not reply or len(reply.split()) < 10:
-        raise ValueError("Reply too short or empty")
+            if llm_result.get("status") != "success":
+                raise ValueError("LLM failed")
 
-    return reply
+            reply = llm_result.get("content", "").strip()
+
+            validate_reply(reply)
+
+            return reply
+
+        except Exception as e:
+            logger.warning(f"Attempt {attempt + 1} failed: {e}")
+
+            if attempt == max_retries - 1:
+                logger.error("Using fallback reply")
+                return _fallback_reply(rating, store, complaint_link)
