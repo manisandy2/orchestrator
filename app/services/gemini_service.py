@@ -41,6 +41,7 @@ async def call_gemini(
     retries: int = 3,
     base_timeout: int = 30,
     expect_json: bool = False,
+    strict: bool = False,
 ) -> dict:
 
     start_time = time.time()
@@ -91,7 +92,16 @@ async def call_gemini(
 
         except Exception as e:
             logger.warning(f"[{trace_id}] Error on attempt {attempt + 1}: {e}")
+            error_str = str(e)
 
+            if "RESOURCE_EXHAUSTED" in error_str or "429" in error_str:
+                logger.error(f"[{trace_id}] Quota exceeded")
+
+                return {
+                    "status": "quota_exceeded",
+                    "content": None,
+                    "reason": "quota",
+                }
         if attempt < retries - 1:
             await asyncio.sleep(2 ** attempt)
 
@@ -109,9 +119,18 @@ async def call_gemini(
 
 def fallback_response(agent_name: str, expect_json: bool = False) -> Union[str, dict]:
     msg = "We are experiencing delays. Please try again later."
-    if agent_name == "review_agent":
-        msg = "We appreciate your feedback and will review this internally."
+
+    if agent_name == "reply_agent":
+        msg = "Thank you for your feedback. We will look into this."
+
     elif agent_name == "compliance_agent":
-        msg = "Please raise a support ticket for further assistance."
+        msg = "Please contact support for further assistance."
+
+    elif agent_name == "decision_agent":
+        return {
+            "classification": {"sentiment": "neutral", "issue_type": "other"},
+            "issues": [],
+            "confidence": 0.5
+        }
 
     return {"error": msg} if expect_json else msg

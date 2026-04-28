@@ -5,7 +5,7 @@ from typing import Optional
 
 from app.agents.reply_agent import reply_agent
 from app.tools.crm_tool import complaint_agent
-from app.agents.supervisor_agent import decision_agent, compliance_agent
+from app.agents.compliance_agent import decision_agent, compliance_agent
 from app.utility.helper import build_complaint_link
 from app.core.state import ReviewState
 from app.utility.validators import validate_tone, validate_completeness

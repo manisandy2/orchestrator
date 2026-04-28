@@ -16,7 +16,7 @@ def _extract_json(text: str) -> dict:
         pass
     return None
 
-async def evaluate_reply(review: str, rating: int, reply: str) -> dict:
+async def _evaluate_reply(review: str, rating: int, reply: str) -> dict:
     prompt = EVALUATION_PROMPT.format(
         review=review,
         rating=rating,
@@ -33,7 +33,7 @@ async def evaluate_reply(review: str, rating: int, reply: str) -> dict:
             return _fallback("llm_failed", rating)
 
         
-        data = res.get("content")
+        data = res.get("content", {})
 
         if not isinstance(data, dict):
             return _fallback("invalid_json", rating)
@@ -44,17 +44,17 @@ async def evaluate_reply(review: str, rating: int, reply: str) -> dict:
             "brand_voice_score": int(data.get("brand_voice_score", 3)),
             "completeness_score": int(data.get("completeness_score", 2)),
             "overall_score": int(data.get("overall_score", 3)),
+
             "issues": data.get("issues", []),
             "suggestions": data.get("suggestions", [])
         }
 
     except Exception as e:
         logger.exception("Evaluation failed")
-        return _fallback(str(e))
+        return _fallback(str(e),rating)
 
 
 def _fallback(reason: str, rating: int = None):
-    # Smart default scores based on rating
 
     return {
         "tone_score": 2 if rating and rating <= 2 else 3,
