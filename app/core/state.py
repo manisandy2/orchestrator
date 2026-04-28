@@ -101,7 +101,7 @@ class ReviewState:
         self.tone: Optional[str] = None   # used for reply generation
 
         self.draft_response: Optional[str] = None
-
+        self.complaint_link:Optional[str] = None
         self.response_type: str = "auto"   # auto | manual | blocked
         self.decision_reason: Optional[str] = None
         self.severity: str = "low"         # low | medium | high

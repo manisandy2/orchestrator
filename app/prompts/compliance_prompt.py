@@ -27,18 +27,18 @@ TASK:
 
 2. Apply business rules (LIMITED SCOPE):
 
-A. Sensitive keywords / Fraud / Harassment:
-If Issue is more about Harassment or Fraud:
-→ Don't post a response, give a simple reply and ask for ticket creation.
-→ Replace entire reply with:
-  "We take this matter seriously. Kindly share more details through the provided link so we can investigate further."
-→ status = "blocked"
+# A. Sensitive keywords / Fraud / Harassment:
+# If Issue is more about Harassment or Fraud:
+# → Don't post a response, give a simple reply and ask for ticket creation.
+# → Replace entire reply with:
+#   "We take this matter seriously. Kindly share more details through the provided link so we can investigate further."
+# → status = "blocked"
 
-B. Staff Behavior issue:
-If generated content accepts a Staff Behavior issue:
-→ Do NOT publicly admit there was a mistake.
-→ Replace entire reply with: "We will investigate the matter in detail. Please share more information in the ticket below."
-→ status = "modified"
+# B. Staff Behavior issue:
+# If generated content accepts a Staff Behavior issue:
+# → Do NOT publicly admit there was a mistake.
+# → Replace entire reply with: "We will investigate the matter in detail. Please share more information in the ticket below."
+# → status = "modified"
 
 3. Quality fixes:
 - Remove duplicate sentences
@@ -55,9 +55,9 @@ If generated content accepts a Staff Behavior issue:
   → status = "modified"
   → final_reply = corrected reply
 
-- If unsafe:
-  → status = "blocked"
-  → final_reply = "We take this matter seriously. Kindly share more details through the provided link so we can investigate further."
+# - If unsafe:
+#   → status = "blocked"
+#   → final_reply = "We take this matter seriously. Kindly share more details through the provided link so we can investigate further."
 
 RULES:
 - Do NOT rewrite completely
