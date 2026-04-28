@@ -17,16 +17,18 @@ def _blocked_response(job_id: str, review: str = "", rating: int = None, locatio
             "status": "blocked",
             "draft_reply": None,
             "final_reply": (
-                "We take this matter seriously and would like to understand it better. "
-                "Please reach out to our support team with more details so we can assist you further."
+                "We’re sorry to hear about your experience. "
+                "For privacy and safety reasons, we’re unable to address this here. "
+                "Please contact our support team with more details so we can assist you further."
             ),
             "compliance_flags": ["sensitive"],
-            "blocked_reason": "Sensitive content detected",
+            "blocked_reason": "Sensitive content detected via _is_sensitive() rule",
             "modified": False
         },
 
         "meta": {
             "needs_manual": True,
+            "escalation_reason": "sensitive_content",
             "complaint_link": None
         }
     }
