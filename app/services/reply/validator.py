@@ -19,8 +19,8 @@ async def _validate_reply(state: ReviewState) -> dict:
             rating=state.rating,
             draft_reply=state.draft_response,
             issue_type=state.issue_type,
-            reviewer=state.reviewer,
-            store=state.location_name,
+            # reviewer=state.reviewer,
+            # store=state.location_name,
         )
 
         if not result or not isinstance(result, dict):

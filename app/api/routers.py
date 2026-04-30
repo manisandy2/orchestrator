@@ -88,9 +88,9 @@ async def process_reviews_from_db(
         }
     }
 ),
-    date_from: Optional[str] = Query(None, description="Start date for fetching reviews (YYYY-MM-DD). Defaults to 30 days ago.", example="2024-02-01"),
-    date_to: Optional[str] = Query(None, description="End date for fetching reviews (YYYY-MM-DD). Defaults to today.", example="2024-03-01"),
-    max_reviews: int = Query(50, ge=1, le=200, description="Maximum number of reviews to process in this batch.", example=50)
+    date_from: Optional[str] = Query(None, description="Start date for fetching reviews (YYYY-MM-DD). Defaults to 30 days ago."),
+    date_to: Optional[str] = Query(None, description="End date for fetching reviews (YYYY-MM-DD). Defaults to today."),
+    max_reviews: int = Query(50, ge=1, le=200, description="Maximum number of reviews to process in this batch.")
 ):
     job_id = str(uuid.uuid4())
     logger.info(f"[{job_id}] Batch processing started")
